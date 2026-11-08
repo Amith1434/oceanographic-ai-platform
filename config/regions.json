@@ -22,11 +22,13 @@
     "fishing_end": "2025-12-31",
     "obis_start": "2015-01-01",
     "obis_end": "2025-12-31"
-    },
+  },
   "model_period": {
-    "train_start": "2015-01-01",
-    "train_end": "2021-12-31",
-    "test_start": "2022-01-01",
+    "train_start": "2019-01-01",
+    "train_end": "2023-12-31",
+    "validation_start": "2024-01-01",
+    "validation_end": "2024-12-31",
+    "test_start": "2025-01-01",
     "test_end": "2025-12-31"
   }
 }
