@@ -1,0 +1,70 @@
+# Oceanographic AI Platform Configuration
+
+project:
+  name: "Oceanographic AI Platform"
+  version: "1.0.0"
+  description: "Cross-domain oceanographic physics, commercial fisheries, and marine biodiversity modeling"
+
+regions:
+  arabian_sea:
+    name: "Arabian Sea"
+    lon_min: 50.0
+    lon_max: 78.0
+    lat_min: 0.0
+    lat_max: 25.0
+    copernicus_path: "data/processed/copernicus/arabian_sea/copernicus_2019_2025.nc"
+    gfw_path: "data/processed/gfw/arabian_sea/gfw_clean.csv"
+  bay_of_bengal:
+    name: "Bay of Bengal"
+    lon_min: 78.0
+    lon_max: 100.0
+    lat_min: 0.0
+    lat_max: 23.0
+    copernicus_path: "data/processed/copernicus/bay_of_bengal/copernicus_2019_2025.nc"
+    gfw_path: "data/processed/gfw/bay_of_bengal/gfw_clean.csv"
+
+obis:
+  path: "data/processed/obis/obis_occurrences_clean.csv"
+  edna_expedition:
+    name: "UNESCO Sundarbans eDNA Expedition"
+    dates: ["2023-01-08", "2023-01-09"]
+    species: "Setipinna tenuifilis"
+    records_count: 476
+    share_of_total_obis: 0.3934
+
+grid:
+  resolution_deg: 0.25
+  coarsen_factor: 3
+  depth_level: 0
+
+splits:
+  train_years: [2019, 2020, 2021, 2022, 2023]
+  val_year: 2024
+  test_year: 2025
+  random_seed: 42
+
+features:
+  spatial_seasonal:
+    - "lat_bin"
+    - "lon_bin"
+    - "region_id"
+    - "dist_to_coast_km"
+    - "sin_month"
+    - "cos_month"
+  ocean_physical:
+    - "thetao"
+    - "so"
+    - "uo"
+    - "vo"
+    - "speed"
+    - "sst_anomaly"
+    - "so_anomaly"
+    - "sst_lag1"
+    - "so_lag1"
+    - "speed_lag1"
+
+caveats:
+  gfw_2022_jump: "AIS satellite coverage artifact (+310.96% in Bay of Bengal) -> Never use year as model feature"
+  malacca_hotspot: "Bay of Bengal box includes Malacca Strait and Andaman Sea (4.1°N, 99.9°E hotspot, MYS/IDN/THA flags)"
+  nature_of_data: "GFW = apparent fishing only; OBIS = presence-only with sampling bias; eDNA reads != abundance"
+  inferential_scope: "Exploratory cross-domain associations, not causal claims"

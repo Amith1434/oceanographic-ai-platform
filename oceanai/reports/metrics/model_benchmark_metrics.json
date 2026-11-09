@@ -1,0 +1,279 @@
+{
+  "baselines": {
+    "Baseline_Climatology": {
+      "StageA_ROC_AUC": 0.7671909900185572,
+      "StageA_PR_AUC": 0.4457114428849355,
+      "StageA_F1": 0.4071066135778867,
+      "StageA_Accuracy": 0.7701143659711075,
+      "StageB_RMSE": 1.5809933652865173,
+      "StageB_MAE": 1.2730888626970827,
+      "StageB_R2": -0.018337849218134306,
+      "StageB_Spearman": 0.2477137554306925
+    },
+    "Baseline_Persistence": {
+      "StageA_ROC_AUC": 0.7024127936017334,
+      "StageA_PR_AUC": 0.40513414259014097,
+      "StageA_F1": 0.5455018385178354,
+      "StageA_Accuracy": 0.7857532994471197,
+      "StageB_RMSE": 1.5514497560301763,
+      "StageB_MAE": 1.2295726033840728,
+      "StageB_R2": 0.01936537888313372,
+      "StageB_Spearman": 0.3116706342348408
+    }
+  },
+  "stage_a": {
+    "Logistic_Regression_M1": {
+      "ROC_AUC": 0.5905981494272436,
+      "PR_AUC": 0.31766820285035774,
+      "F1": 0.0861672095548317,
+      "Accuracy": 0.7654605849830569,
+      "Precision": 0.538837588267246,
+      "Recall": 0.04682779456193353,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month"
+      ]
+    },
+    "Logistic_Regression_M2": {
+      "ROC_AUC": 0.611964293155822,
+      "PR_AUC": 0.32140510769341823,
+      "F1": 0.10001891908936117,
+      "Accuracy": 0.7613864365971108,
+      "Precision": 0.457236209878916,
+      "Recall": 0.05615086858006042,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month",
+        "thetao",
+        "so",
+        "uo",
+        "vo",
+        "speed",
+        "sst_anomaly",
+        "so_anomaly",
+        "sst_lag1",
+        "so_lag1",
+        "speed_lag1"
+      ]
+    },
+    "Random_Forest_M1": {
+      "ROC_AUC": 0.8114646246994911,
+      "PR_AUC": 0.48430382910510195,
+      "F1": 0.35193485259768953,
+      "Accuracy": 0.7711342964151953,
+      "Precision": 0.5310535340064775,
+      "Recall": 0.2631703172205438,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month"
+      ]
+    },
+    "Random_Forest_M2": {
+      "ROC_AUC": 0.7904750657146705,
+      "PR_AUC": 0.47044612574300343,
+      "F1": 0.23177055005620217,
+      "Accuracy": 0.7638331549848404,
+      "Precision": 0.4997654417513683,
+      "Recall": 0.15086858006042297,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month",
+        "thetao",
+        "so",
+        "uo",
+        "vo",
+        "speed",
+        "sst_anomaly",
+        "so_anomaly",
+        "sst_lag1",
+        "so_lag1",
+        "speed_lag1"
+      ]
+    },
+    "XGBoost_M1": {
+      "ROC_AUC": 0.8065217879720687,
+      "PR_AUC": 0.49575471499879287,
+      "F1": 0.3652889459028191,
+      "Accuracy": 0.773876404494382,
+      "Precision": 0.5416628004082769,
+      "Recall": 0.27556174471299094,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month"
+      ]
+    },
+    "XGBoost_M2": {
+      "ROC_AUC": 0.7991613454994227,
+      "PR_AUC": 0.4874598944342752,
+      "F1": 0.31399533488837056,
+      "Accuracy": 0.7705212234706617,
+      "Precision": 0.5338205302515295,
+      "Recall": 0.22240842145015105,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month",
+        "thetao",
+        "so",
+        "uo",
+        "vo",
+        "speed",
+        "sst_anomaly",
+        "so_anomaly",
+        "sst_lag1",
+        "so_lag1",
+        "speed_lag1"
+      ]
+    }
+  },
+  "stage_b": {
+    "Linear_Regression_M1": {
+      "RMSE": 1.5363116305056204,
+      "MAE": 1.237190359665751,
+      "R2": 0.0384089163607807,
+      "Spearman": 0.19499473885050247,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month"
+      ]
+    },
+    "Linear_Regression_M2": {
+      "RMSE": 1.5365598821155246,
+      "MAE": 1.2386737849780753,
+      "R2": 0.038098125481028866,
+      "Spearman": 0.20715709931627543,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month",
+        "thetao",
+        "so",
+        "uo",
+        "vo",
+        "speed",
+        "sst_anomaly",
+        "so_anomaly",
+        "sst_lag1",
+        "so_lag1",
+        "speed_lag1"
+      ]
+    },
+    "Random_Forest_M1": {
+      "RMSE": 1.3904782775879285,
+      "MAE": 1.1358546184211742,
+      "R2": 0.21230115592184473,
+      "Spearman": 0.37505359496239016,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month"
+      ]
+    },
+    "Random_Forest_M2": {
+      "RMSE": 1.421921908510355,
+      "MAE": 1.1565390384067478,
+      "R2": 0.17627303605679678,
+      "Spearman": 0.3659323034767839,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month",
+        "thetao",
+        "so",
+        "uo",
+        "vo",
+        "speed",
+        "sst_anomaly",
+        "so_anomaly",
+        "sst_lag1",
+        "so_lag1",
+        "speed_lag1"
+      ]
+    },
+    "XGBoost_M1": {
+      "RMSE": 1.395681587653091,
+      "MAE": 1.1396730388617515,
+      "R2": 0.20639482835864031,
+      "Spearman": 0.3802301000246578,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month"
+      ]
+    },
+    "XGBoost_M2": {
+      "RMSE": 1.4248249043466388,
+      "MAE": 1.1610262527120778,
+      "R2": 0.17290616063729813,
+      "Spearman": 0.3553131150034825,
+      "Features": [
+        "lat_bin",
+        "lon_bin",
+        "region_id",
+        "dist_to_coast_km",
+        "sin_month",
+        "cos_month",
+        "thetao",
+        "so",
+        "uo",
+        "vo",
+        "speed",
+        "sst_anomaly",
+        "so_anomaly",
+        "sst_lag1",
+        "so_lag1",
+        "speed_lag1"
+      ]
+    }
+  },
+  "combined": {
+    "Test_RMSE": 106.53947174764019,
+    "Test_MAE": 17.411944819622423,
+    "Test_Spearman": 0.4658616376447558
+  },
+  "ablation_delta": {
+    "StageA_ROC_AUC_Delta_XGB": -0.0073604424726460005,
+    "StageA_PR_AUC_Delta_XGB": -0.008294820564517691,
+    "StageB_R2_Delta_XGB": -0.03348866772134218,
+    "StageB_RMSE_Delta_XGB": -0.02914331669354775
+  }
+}
