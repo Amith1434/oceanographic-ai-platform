@@ -1,0 +1,22 @@
+{
+  "Warm_Anomaly_Hours_Diff": {
+    "Mean": 5.272,
+    "CI_95_Lower": 2.256,
+    "CI_95_Upper": 8.356
+  },
+  "Warm_Anomaly_Rate_Diff_Pct": {
+    "Mean": 7.144,
+    "CI_95_Lower": 3.021,
+    "CI_95_Upper": 11.059
+  },
+  "Iso_Disruption_Hours_Diff": {
+    "Mean": -2.678,
+    "CI_95_Lower": -4.701,
+    "CI_95_Upper": -0.506
+  },
+  "Iso_Disruption_Rate_Diff_Pct": {
+    "Mean": -4.015,
+    "CI_95_Lower": -6.662,
+    "CI_95_Upper": -1.382
+  }
+}

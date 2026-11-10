@@ -63,8 +63,9 @@ st.error("""
 🚨 **Critical Analytical Caveats & Scientific Disclaimers:**
 1. **GFW 2022 Coverage Jump:** The +310.96% increase in apparent fishing in the Bay of Bengal from 2022 onward reflects an AIS satellite constellation upgrade, NOT real fleet growth. `year` is strictly excluded from all model feature spaces.
 2. **Malacca Strait Incursion:** The Bay of Bengal bounding box includes the Andaman Sea and northern entrance to the Malacca Strait, explaining the 4.1°N, 99.9°E hotspot and foreign flag states (MYS, IDN, THA).
-3. **OBIS UNESCO Sundarbans Survey:** 39.34% of all OBIS records (100% of *Setipinna tenuifilis*) originate from a single 2-day eDNA cruise (8–9 Jan 2023, 19 sites). eDNA reads denote molecular presence, NOT abundance. Species Distribution Modeling (SDM) is omitted to avoid predicting cruise tracks.
-4. **Association ≠ Causation:** Cross-domain findings describe statistical associations between ocean state and fishing detections, not causal mechanisms.
+3. **Equatorial Waters in Bounding Box (0°N – 8°N):** The original data download bounding boxes were set from 0°N to 25°N/23°N. India ends at ~8°N and Sri Lanka ends at ~6°N; therefore, the downloaded NetCDF and GFW files naturally encompass the open Equatorial Indian Ocean waters down to 0°N.
+4. **OBIS UNESCO Sundarbans Survey:** 39.34% of all OBIS records (100% of *Setipinna tenuifilis*) originate from a single 2-day eDNA cruise (8–9 Jan 2023, 19 sites). eDNA reads denote molecular presence, NOT abundance. Species Distribution Modeling (SDM) is omitted to avoid predicting cruise tracks.
+5. **Association ≠ Causation:** Cross-domain findings describe statistical associations between ocean state and fishing detections, not causal mechanisms.
 """)
 
 st.markdown("---")
@@ -91,7 +92,7 @@ tab_overview, tab_roadmap, tab_arch = st.tabs([
 ])
 
 with tab_overview:
-    st.markdown("""
+    st.markdown(r"""
     ### Research Question
     > **Do ocean physical conditions (potential temperature, salinity, currents) help predict where and how much apparent commercial fishing happens in a given month?**
     
@@ -107,7 +108,7 @@ with tab_overview:
     """)
 
 with tab_roadmap:
-    st.markdown("""
+    st.markdown(r"""
     ### 5-Day Strategic Delivery Plan
     | Day | Focus Area | Deliverable Status |
     | :---: | :--- | :--- |
@@ -119,7 +120,7 @@ with tab_roadmap:
     """)
 
 with tab_arch:
-    st.markdown("""
+    st.markdown(r"""
     ### Modular Pipeline Architecture
     ```
     Copernicus Marine Reanalysis (0.083°, 84 mo) ──┐

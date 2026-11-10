@@ -1,0 +1,38 @@
+[
+  {
+    "Origin_Window":"Train 2019-2021 -> Test 2022",
+    "Train_Years":"2019-2021",
+    "Test_Year":2022,
+    "Train_Positive_Rows":75432,
+    "Test_Positive_Rows":48930,
+    "StageB_R2":-0.0004,
+    "StageB_RMSE":1.3609
+  },
+  {
+    "Origin_Window":"Train 2019-2022 -> Test 2023",
+    "Train_Years":"2019-2022",
+    "Test_Year":2023,
+    "Train_Positive_Rows":124362,
+    "Test_Positive_Rows":52036,
+    "StageB_R2":0.0317,
+    "StageB_RMSE":1.3787
+  },
+  {
+    "Origin_Window":"Train 2019-2023 -> Test 2024 (Val)",
+    "Train_Years":"2019-2023",
+    "Test_Year":2024,
+    "Train_Positive_Rows":176398,
+    "Test_Positive_Rows":45759,
+    "StageB_R2":0.1859,
+    "StageB_RMSE":1.3049
+  },
+  {
+    "Origin_Window":"Train 2019-2023 -> Test 2025 (Test)",
+    "Train_Years":"2019-2023",
+    "Test_Year":2025,
+    "Train_Positive_Rows":176398,
+    "Test_Positive_Rows":42368,
+    "StageB_R2":0.1732,
+    "StageB_RMSE":1.4246
+  }
+]

@@ -76,23 +76,51 @@ def engineer_features(df: pd.DataFrame, config: dict, repo_root: Path) -> pd.Dat
     # 3. Spatial Geometry: Distance to Coast
     df = compute_distance_to_coast(df, config, repo_root)
     
-    # 4. Cell-Level Monthly Climatologies & Physical Anomalies
-    logger.info("Computing cell-specific monthly climatologies (2019-2025)...")
-    clim = df.groupby(["region", "lat_bin", "lon_bin", "cal_month"])[["thetao", "so"]].agg(["mean", "std"]).reset_index()
-    clim.columns = [
+    # 4. Cell-Level Monthly Climatologies & Physical Anomalies (TRAIN-PERIOD ONLY: 2019-2023)
+    logger.info("Computing cell-specific monthly climatologies from TRAIN PERIOD (2019-2023) to prevent leakage...")
+    train_mask = df["year"] <= 2023
+    clim_train = (
+        df[train_mask]
+        .groupby(["region", "lat_bin", "lon_bin", "cal_month"])[["thetao", "so"]]
+        .agg(["mean", "std"])
+        .reset_index()
+    )
+    clim_train.columns = [
         "region", "lat_bin", "lon_bin", "cal_month",
         "clim_thetao_mean", "clim_thetao_std",
         "clim_so_mean", "clim_so_std"
     ]
     # Replace zero or NaN standard deviations with fallback 1.0
-    clim["clim_thetao_std"] = clim["clim_thetao_std"].fillna(1.0).replace(0.0, 1.0)
-    clim["clim_so_std"] = clim["clim_so_std"].fillna(1.0).replace(0.0, 1.0)
+    clim_train["clim_thetao_std"] = clim_train["clim_thetao_std"].fillna(1.0).replace(0.0, 1.0)
+    clim_train["clim_so_std"] = clim_train["clim_so_std"].fillna(1.0).replace(0.0, 1.0)
     
-    df = df.merge(clim, on=["region", "lat_bin", "lon_bin", "cal_month"], how="left")
+    # Merge train climatologies onto all years (train, val, test)
+    df = df.merge(clim_train, on=["region", "lat_bin", "lon_bin", "cal_month"], how="left")
     
+    # Model features (leak-free: relative to 2019-2023 baseline)
     df["sst_anomaly"] = df["thetao"] - df["clim_thetao_mean"]
     df["so_anomaly"] = df["so"] - df["clim_so_mean"]
     df["sst_zscore"] = df["sst_anomaly"] / df["clim_thetao_std"]
+    
+    # Also compute full-period climatologies and anomalies for descriptive anomaly mapping only
+    logger.info("Computing separate full-period (2019-2025) anomalies for descriptive mapping...")
+    clim_full = (
+        df.groupby(["region", "lat_bin", "lon_bin", "cal_month"])[["thetao", "so"]]
+        .agg(["mean", "std"])
+        .reset_index()
+    )
+    clim_full.columns = [
+        "region", "lat_bin", "lon_bin", "cal_month",
+        "clim_thetao_mean_fullperiod", "clim_thetao_std_fullperiod",
+        "clim_so_mean_fullperiod", "clim_so_std_fullperiod"
+    ]
+    clim_full["clim_thetao_std_fullperiod"] = clim_full["clim_thetao_std_fullperiod"].fillna(1.0).replace(0.0, 1.0)
+    clim_full["clim_so_std_fullperiod"] = clim_full["clim_so_std_fullperiod"].fillna(1.0).replace(0.0, 1.0)
+    
+    df = df.merge(clim_full, on=["region", "lat_bin", "lon_bin", "cal_month"], how="left")
+    df["sst_anomaly_fullperiod"] = df["thetao"] - df["clim_thetao_mean_fullperiod"]
+    df["so_anomaly_fullperiod"] = df["so"] - df["clim_so_mean_fullperiod"]
+    df["sst_zscore_fullperiod"] = df["sst_anomaly_fullperiod"] / df["clim_thetao_std_fullperiod"]
     
     # 5. One-Month Lagged Features
     logger.info("Calculating 1-month autoregressive lags for ocean state and fishing...")
@@ -116,7 +144,11 @@ def engineer_features(df: pd.DataFrame, config: dict, repo_root: Path) -> pd.Dat
     df["log_hours"] = np.log1p(df["hours"])
     
     # Drop raw intermediate climatology columns
-    df = df.drop(columns=["clim_thetao_mean", "clim_thetao_std", "clim_so_mean", "clim_so_std"])
+    df = df.drop(columns=[
+        "clim_thetao_mean", "clim_thetao_std", "clim_so_mean", "clim_so_std",
+        "clim_thetao_mean_fullperiod", "clim_thetao_std_fullperiod",
+        "clim_so_mean_fullperiod", "clim_so_std_fullperiod"
+    ])
     
     # 7. Methodological Guardrail Verification
     feature_cols = config["features"]["spatial_seasonal"] + config["features"]["ocean_physical"]

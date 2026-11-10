@@ -1,0 +1,48 @@
+{
+  "Spatial_Features": {
+    "Features": [
+      "lat_bin",
+      "lon_bin",
+      "region_id",
+      "dist_to_coast_km"
+    ],
+    "Count": 4,
+    "Split_Gain_Share_Pct": 48.21,
+    "Permutation_Drop_Share_Pct": 76.06,
+    "TreeSHAP_Share_Pct": 61.9
+  },
+  "Seasonal_Features": {
+    "Features": [
+      "sin_month",
+      "cos_month"
+    ],
+    "Count": 2,
+    "Split_Gain_Share_Pct": 20.18,
+    "Permutation_Drop_Share_Pct": 15.79,
+    "TreeSHAP_Share_Pct": 16.05
+  },
+  "Ocean_Physical_Features": {
+    "Features": [
+      "thetao",
+      "so",
+      "uo",
+      "vo",
+      "speed",
+      "sst_anomaly",
+      "so_anomaly",
+      "sst_lag1",
+      "so_lag1",
+      "speed_lag1"
+    ],
+    "Count": 10,
+    "Split_Gain_Share_Pct": 31.63,
+    "Permutation_Drop_Share_Pct": 8.16,
+    "TreeSHAP_Share_Pct": 22.04
+  },
+  "Spatial_Plus_Seasonal_Total": {
+    "Features_Count": 6,
+    "Split_Gain_Share_Pct": 68.39,
+    "Permutation_Drop_Share_Pct": 91.85,
+    "TreeSHAP_Share_Pct": 77.95
+  }
+}

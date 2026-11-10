@@ -1,9 +1,11 @@
 """
-Page 4: Feature Importance & Native TreeSHAP Analysis
+Page 4: Feature Attribution & Native TreeSHAP Analysis
 =====================================================
-Explains decision drivers using exact TreeSHAP attributions and permutation drops.
+Explains decision drivers across ALL 16 features using exact TreeSHAP attributions,
+permutation drops, split gain, and grouped category shares.
 """
 
+import json
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
@@ -18,78 +20,113 @@ FIGURES_DIR = OCEANAI_DIR / "reports" / "figures"
 
 @st.cache_data
 def load_feature_importance():
-    imp_csv = METRICS_DIR / "feature_importance.csv"
-    if imp_csv.exists():
-        return pd.read_csv(imp_csv)
-    return None
+    f_csv = METRICS_DIR / "feature_importance_stage_a_m2.csv"
+    f_json = METRICS_DIR / "feature_importance_grouped_shares.json"
+    
+    # Fallback to feature_importance.csv if stage_a_m2 not yet finished
+    if not f_csv.exists():
+        f_csv = METRICS_DIR / "feature_importance.csv"
+        
+    df_imp = pd.read_csv(f_csv) if f_csv.exists() else None
+    grouped = None
+    if f_json.exists():
+        with open(f_json, "r", encoding="utf-8") as f:
+            grouped = json.load(f)
+            
+    return df_imp, grouped
 
 
 st.title("📊 Feature Attribution & Native TreeSHAP Analysis")
 st.markdown("""
-To understand how individual features contribute to predictions in **Model 2 (Full Model)**, we evaluate:
-1. **Native TreeSHAP Values:** Exact Shapley attributions computed directly via XGBoost's C++ booster (`pred_contribs=True`).
-2. **Permutation Importance:** Drop in test set ROC-AUC when each feature is independently shuffled.
-3. **Gain Importance:** Relative improvement in tree node purity contributed by each feature.
+To dissect model decision pathways for **Model 2 (16 Features)**, we evaluate three complementary explainability paradigms:
+1. **XGBoost Split Gain:** Normalised improvement in tree objective contributed by each feature split.
+2. **Out-of-Time Test Permutation Importance:** Drop in test set ROC-AUC when each feature is independently shuffled (5 repeats).
+3. **Native TreeSHAP Values:** Exact Shapley attributions computed directly via XGBoost's C++ booster (`pred_contribs=True`).
 """)
 
-df_imp = load_feature_importance()
+df_imp, grouped = load_feature_importance()
 if df_imp is None:
     st.error("Feature importance data not found. Run train_models.py first.")
     st.stop()
 
-# Classify categories
-spatial_cols = ["lat_bin", "lon_bin", "region_id", "dist_to_coast_km", "sin_month", "cos_month"]
-df_imp["Domain"] = df_imp["Feature"].apply(lambda x: "Spatial / Seasonal" if x in spatial_cols else "Ocean Physical")
+# 1. Grouped Shares
+st.header("1. Grouped Category Predictive Shares")
+if grouped:
+    g_rows = []
+    g_rows.append({
+        "Category": "Spatial Geography",
+        "Features Included": ", ".join(f"`{f}`" for f in grouped["Spatial_Features"]["Features"]),
+        "Count": grouped["Spatial_Features"]["Count"],
+        "Split Gain Share": f"{grouped['Spatial_Features']['Split_Gain_Share_Pct']:.2f}%",
+        "Permutation Drop Share": f"{grouped['Spatial_Features']['Permutation_Drop_Share_Pct']:.2f}%",
+        "TreeSHAP Share": f"{grouped['Spatial_Features']['TreeSHAP_Share_Pct']:.2f}%"
+    })
+    g_rows.append({
+        "Category": "Monsoon Seasonality",
+        "Features Included": ", ".join(f"`{f}`" for f in grouped["Seasonal_Features"]["Features"]),
+        "Count": grouped["Seasonal_Features"]["Count"],
+        "Split Gain Share": f"{grouped['Seasonal_Features']['Split_Gain_Share_Pct']:.2f}%",
+        "Permutation Drop Share": f"{grouped['Seasonal_Features']['Permutation_Drop_Share_Pct']:.2f}%",
+        "TreeSHAP Share": f"{grouped['Seasonal_Features']['TreeSHAP_Share_Pct']:.2f}%"
+    })
+    g_rows.append({
+        "Category": "Dynamic Ocean Physics",
+        "Features Included": ", ".join(f"`{f}`" for f in grouped["Ocean_Physical_Features"]["Features"]),
+        "Count": grouped["Ocean_Physical_Features"]["Count"],
+        "Split Gain Share": f"{grouped['Ocean_Physical_Features']['Split_Gain_Share_Pct']:.2f}%",
+        "Permutation Drop Share": f"{grouped['Ocean_Physical_Features']['Permutation_Drop_Share_Pct']:.2f}%",
+        "TreeSHAP Share": f"{grouped['Ocean_Physical_Features']['TreeSHAP_Share_Pct']:.2f}%"
+    })
+    df_g = pd.DataFrame(g_rows)
+    st.dataframe(df_g)
 
-st.subheader("TreeSHAP and Permutation Importance Ranking")
+st.markdown("---")
+
+# 2. Complete 16-Feature Importance Table
+st.header("2. Complete 16-Feature Importance Ranking")
 st.dataframe(df_imp.style.format({
-    "Mean_Abs_SHAP": "{:.4f}",
-    "Permutation_ROC_AUC_Drop": "{:.4f}",
-    "StageA_Gain_Pct": "{:.2f}%",
-    "StageB_Gain_Pct": "{:.2f}%"
+    "Normalized_Split_Gain": "{:.4f}",
+    "Permutation_Drop_AUC": "{:.4f}",
+    "Normalized_Permutation": "{:.4f}",
+    "Mean_Abs_TreeSHAP": "{:.4f}",
+    "Normalized_TreeSHAP": "{:.4f}"
 }))
 
 st.markdown("---")
 
-col1, col2 = st.columns(2)
+# 3. Interactive Visualizations
+st.header("3. Tripartite Explainability Comparison")
+c1, c2 = st.columns(2)
 
-with col1:
-    fig_bar = px.bar(
-        df_imp.sort_values("Mean_Abs_SHAP", ascending=True),
-        x="Mean_Abs_SHAP",
+with c1:
+    fig_shap = px.bar(
+        df_imp.sort_values("Normalized_TreeSHAP", ascending=True),
+        x="Normalized_TreeSHAP",
         y="Feature",
-        color="Domain",
         orientation="h",
-        color_discrete_map={"Spatial / Seasonal": "#1f77b4", "Ocean Physical": "#2ca02c"},
-        title="Mean |TreeSHAP Value| (Impact on Stage A Occurrence)",
-        labels={"Mean_Abs_SHAP": "Mean |SHAP| (Log-Odds Impact)", "Feature": "Predictor"}
+        title="Mean |TreeSHAP| Attributions (Normalized Share)",
+        color="Normalized_TreeSHAP",
+        color_continuous_scale="Viridis",
+        labels={"Normalized_TreeSHAP": "TreeSHAP Share", "Feature": "Feature"}
     )
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig_shap, use_container_width=True)
 
-with col2:
-    fig_perm = px.bar(
-        df_imp.sort_values("Permutation_ROC_AUC_Drop", ascending=True),
-        x="Permutation_ROC_AUC_Drop",
+with c2:
+    fig_gain = px.bar(
+        df_imp.sort_values("Normalized_Split_Gain", ascending=True),
+        x="Normalized_Split_Gain",
         y="Feature",
-        color="Domain",
         orientation="h",
-        color_discrete_map={"Spatial / Seasonal": "#1f77b4", "Ocean Physical": "#2ca02c"},
-        title="Permutation Importance (ROC-AUC Drop on 2025 Test Set)",
-        labels={"Permutation_ROC_AUC_Drop": "Test ROC-AUC Drop", "Feature": "Predictor"}
+        title="XGBoost Split Gain (Normalized Share)",
+        color="Normalized_Split_Gain",
+        color_continuous_scale="Cividis",
+        labels={"Normalized_Split_Gain": "Split Gain Share", "Feature": "Feature"}
     )
-    st.plotly_chart(fig_perm, use_container_width=True)
+    st.plotly_chart(fig_gain, use_container_width=True)
 
-st.markdown("""
-### Analytical Summary:
-- **Spatial Coordinates Dominance:** `lon_bin` and `lat_bin` dominate TreeSHAP and permutation drops. Shuffling `lon_bin` collapses model ROC-AUC by **+0.1759**, confirming that spatial position is the overriding predictive factor.
-- **Vessel Proximity Factor:** `dist_to_coast_km` is the 2nd most critical feature, reflecting fuel economics, operational vessel range, and the concentration of trawlers along shallow coastal shelf breaks.
-- **Monsoon Cycles:** `sin_month` and `cos_month` account for ~20% of decision splits, capturing the annual monsoon closure seasons.
-- **Ocean Physics:** Individual physical features (SST, salinity, currents, anomalies) exhibit small permutation drops (<0.013), indicating they modulate predictions locally but do not dictate general fleet distribution.
-""")
-
-st.subheader("Publication Diagnostic Plots")
-im_c1, im_c2 = st.columns(2)
+st.subheader("Publication Diagnostic Visualizations")
+c_p1, c_p2 = st.columns(2)
 if (FIGURES_DIR / "shap_summary_stage_a.png").exists():
-    im_c1.image(str(FIGURES_DIR / "shap_summary_stage_a.png"), caption="TreeSHAP Feature Attribution Bar Chart", use_container_width=True)
+    c_p1.image(str(FIGURES_DIR / "shap_summary_stage_a.png"), caption="TreeSHAP Feature Attributions Bar Chart", use_container_width=True)
 if (FIGURES_DIR / "feature_importance_comparison.png").exists():
-    im_c2.image(str(FIGURES_DIR / "feature_importance_comparison.png"), caption="XGBoost Relative Gain: Stage A vs Stage B", use_container_width=True)
+    c_p2.image(str(FIGURES_DIR / "feature_importance_comparison.png"), caption="Tripartite Comparison: Gain vs Permutation vs TreeSHAP", use_container_width=True)

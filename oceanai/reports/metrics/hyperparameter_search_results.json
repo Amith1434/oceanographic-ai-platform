@@ -1,0 +1,18 @@
+{
+  "StageA_Best_Params": {
+    "max_depth": 8,
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 120
+  },
+  "StageA_Decision_Threshold_tau": 0.16000000000000003,
+  "StageB_Best_Params": {
+    "max_depth": 6,
+    "learning_rate": 0.08,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "n_estimators": 160
+  },
+  "StageB_Duan_Smearing_Factor": 2.4555702314816203
+}

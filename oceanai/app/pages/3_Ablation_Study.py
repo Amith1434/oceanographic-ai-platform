@@ -1,11 +1,13 @@
 """
 Page 3: Scientific Ablation Study
 =================================
-Quantifies the marginal value of physical ocean variables against a spatial-seasonal baseline.
+Rigorous 5-model ablation experiment across Pooled, Arabian Sea, and Bay of Bengal panels
+with month-block bootstrap 95% confidence intervals on delta metrics.
 """
 
 import json
 from pathlib import Path
+import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Ablation Study - Ocean AI", page_icon="⚖️", layout="wide")
@@ -16,57 +18,100 @@ FIGURES_DIR = OCEANAI_DIR / "reports" / "figures"
 
 
 @st.cache_data
-def load_metrics():
-    metrics_path = METRICS_DIR / "model_benchmark_metrics.json"
-    if metrics_path.exists():
-        with open(metrics_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return None
+def load_ablation_data():
+    f_csv = METRICS_DIR / "ablation_study_expanded.csv"
+    f_json = METRICS_DIR / "ablation_bootstrap_cis.json"
+    
+    df_abl = pd.read_csv(f_csv) if f_csv.exists() else None
+    cis = None
+    if f_json.exists():
+        with open(f_json, "r", encoding="utf-8") as f:
+            cis = json.load(f)
+    return df_abl, cis
 
 
-st.title("⚖️ Scientific Ablation Study: Does Ocean Physics Add Value?")
-st.markdown("""
-### Research Question
-> **Do ocean physical conditions (potential temperature, salinity, currents, anomalies, lags) help predict where and how much apparent commercial fishing happens, beyond spatial position and seasonal monsoons?**
+st.title("⚖️ The Scientific Ablation Study: Does Ocean Physics Add Value?")
+st.markdown(r"""
+### The Central Scientific Hypothesis
+> **Do physical oceanographic conditions (sea temperature, salinity, currents, anomalies, lags) help predict where and how much apparent commercial fishing happens, beyond spatial position and seasonal monsoons?**
 
-To answer this honestly, we formulated a controlled ablation experiment evaluated on out-of-time test data (**2025**):
-- **Model 1 (Spatial + Seasonal):** Coordinates (`lat_bin`, `lon_bin`), `region_id`, `dist_to_coast_km`, and monsoon harmonics ($\sin, \cos$).
-- **Model 2 (Spatial + Seasonal + Ocean):** Model 1 + `thetao`, `so`, `uo`, `vo`, `speed`, `sst_anomaly`, `so_anomaly`, `sst_lag1`, `so_lag1`, `speed_lag1`.
+To answer this conclusively, we evaluated a 5-model ablation hierarchy across three geographic panels on out-of-time test data (**2025**):
+- **M1 (Spatial + Seasonal, 6 feats):** `lat_bin`, `lon_bin`, `region_id`, `dist_to_coast_km`, `sin_month`, `cos_month`.
+- **M2 (Spatial + Seasonal + Ocean, 16 feats):** M1 + `thetao`, `so`, `uo`, `vo`, `speed`, `sst_anomaly`, `so_anomaly`, `sst_lag1`, `so_lag1`, `speed_lag1`.
+- **M2b (Spatial + Seasonal + Anomalies, 8 feats):** M1 + `sst_anomaly`, `so_anomaly`.
+- **M3 (Spatial + Seasonal + Persistence, 8 feats):** M1 + `hours_lag1`, `is_fishing_lag1`.
+- **M4 (Full + Persistence + Ocean, 18 feats):** M3 + All Ocean Variables.
 """)
 
-metrics = load_metrics()
-if metrics is None:
-    st.error("Metrics not found. Please train models first.")
+df_abl, cis = load_ablation_data()
+if df_abl is None:
+    st.error("Ablation study results not found. Run train_models.py first.")
     st.stop()
 
-abl = metrics["ablation_delta"]
+# 1. Expanded Ablation Table
+st.header("1. Out-of-Time Test (2025) Performance Across Geographic Panels")
 
-# Metric Deltas
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Stage A Occurrence ROC-AUC (M1)", f"{metrics['stage_a']['XGBoost_M1']['ROC_AUC']:.4f}")
-col1.metric("Stage A Occurrence ROC-AUC (M2)", f"{metrics['stage_a']['XGBoost_M2']['ROC_AUC']:.4f}", delta=f"{abl['StageA_ROC_AUC_Delta_XGB']:+.4f}")
+panel_choice = st.selectbox(
+    "Filter by Geographic Basin:",
+    ["All Panels", "Pooled (All Basins)", "Arabian Sea", "Bay of Bengal"],
+    index=0
+)
 
-col2.metric("Stage A PR-AUC (M1)", f"{metrics['stage_a']['XGBoost_M1']['PR_AUC']:.4f}")
-col2.metric("Stage A PR-AUC (M2)", f"{metrics['stage_a']['XGBoost_M2']['PR_AUC']:.4f}", delta=f"{abl['StageA_PR_AUC_Delta_XGB']:+.4f}")
+view_df = df_abl.copy()
+if panel_choice != "All Panels":
+    view_df = view_df[view_df["Panel"] == panel_choice].copy()
 
-col3.metric("Stage B Intensity R² (M1)", f"{metrics['stage_b']['XGBoost_M1']['R2']:.4f}")
-col3.metric("Stage B Intensity R² (M2)", f"{metrics['stage_b']['XGBoost_M2']['R2']:.4f}", delta=f"{abl['StageB_R2_Delta_XGB']:+.4f}")
-
-col4.metric("Stage B Intensity RMSE (M1)", f"{metrics['stage_b']['XGBoost_M1']['RMSE']:.4f}")
-col4.metric("Stage B Intensity RMSE (M2)", f"{metrics['stage_b']['XGBoost_M2']['RMSE']:.4f}", delta=f"{-abl['StageB_RMSE_Delta_XGB']:+.4f}")
+st.dataframe(view_df.style.format({
+    "Num_Features": "{:d}",
+    "StageA_Test_ROC_AUC": "{:.4f}",
+    "StageA_Test_PR_AUC": "{:.4f}",
+    "StageA_Test_F1": "{:.4f}",
+    "StageA_Val_Threshold": "{:.2f}",
+    "StageB_Test_R2": "{:.4f}",
+    "StageB_Test_RMSE": "{:.4f}",
+    "StageB_Test_Spearman": "{:.4f}"
+}))
 
 st.markdown("---")
 
-st.header("Scientific Finding & Interpretation")
-st.info("""
-### Why Ocean Physical Predictors Add Negligible Marginal Value:
-1. **Sovereign EEZs and Spatial Constraints:** Commercial fishing fleets operate under national licensing boundaries, marine protected zones, and Exclusive Economic Zones (EEZs). Distance to harbor ports and shallow continental shelves dictate operational range far more than sea temperature.
-2. **Regulatory Seasonal Bans:** In the Indian Ocean, commercial mechanized fishing is closed during the annual monsoon trawl ban (e.g., India's 61-day monsoon ban on the West coast during June–July and East coast during April–May). Harmonic seasonal variables ($\sin, \cos$) capture this regulatory rhythm completely.
-3. **Out-of-Time Transferability:** While ocean physics features are split on inside tree models, they exhibit slight out-of-time distribution shifts across years, causing a modest generalization penalty on unseen 2025 test data ($\Delta \text{ROC-AUC} = -0.0074$).
-4. **Honest Scientific Reporting:** It is crucial to report this null/marginal finding transparently. Commercial fishing is primarily governed by human geography, fuel logistics, and governance—not subtle monthly shifts in surface salinity or currents.
+# 2. Month-Block Bootstrap Deltas
+st.header("2. Rigorous Month-Block Bootstrap Confidence Intervals (M2 − M1)")
+st.markdown(r"""
+To evaluate whether the difference between Model 2 (+Ocean) and Model 1 (Base) is statistically meaningful,
+we computed **1,000 month-block bootstrap iterations** on the 2025 test set:
 """)
 
-st.subheader("Benchmark Comparison Visualization")
+if cis:
+    roc_ci = cis.get("Delta_ROC_AUC_M2_minus_M1", {})
+    r2_ci = cis.get("Delta_R2_StageB_M2_minus_M1", {})
+    
+    c1, c2 = st.columns(2)
+    c1.metric(
+        "Stage A Δ ROC-AUC (M2 − M1)",
+        f"{roc_ci.get('Mean', 0):+.4f}",
+        f"95% CI: [{roc_ci.get('CI_95_Lower', 0):+.4f}, {roc_ci.get('CI_95_Upper', 0):+.4f}]",
+        delta_color="off"
+    )
+    c2.metric(
+        "Stage B Δ R² (M2 − M1)",
+        f"{r2_ci.get('Mean', 0):+.4f}",
+        f"95% CI: [{r2_ci.get('CI_95_Lower', 0):+.4f}, {r2_ci.get('CI_95_Upper', 0):+.4f}]",
+        delta_color="off"
+    )
+
+st.markdown("---")
+
+# 3. Mechanistic Synthesis
+st.header("3. Mechanistic Explanation for the Null / Marginal Finding")
+st.info(r"""
+### Why Dynamic Ocean Physics Adds Negligible Out-of-Time Predictive Value:
+1. **Sovereign EEZs & Continental Shelf Bathymetry:** Commercial fishing fleets are constrained by maritime boundaries, exclusive economic zones, and distance to landing ports. Vessel range and ice-hold duration govern spatial presence far more than surface temperature.
+2. **Statutory Monsoon Trawl Bans:** India enforces uniform 47–61 day mechanized trawl bans (June–July on the West coast, April–May on the East coast). Seasonal harmonics ($\sin, \cos$) completely capture this regulatory calendar.
+3. **Collinearity & Overfitting:** Sea surface temperature and salinity co-vary strongly with latitude, longitude, and calendar month. Adding 10 collinear features increases model complexity without introducing novel orthogonal variance, causing minor out-of-time test degradation.
+4. **Honest Scientific Reporting:** Transparently reporting this marginal/null finding is a scientifically robust result. It demonstrates that commercial fishing is governed by human institutions and geography rather than passive oceanographic drift.
+""")
+
+st.subheader("Publication Diagnostic Visualizations")
 fig_ablation = FIGURES_DIR / "ablation_roc_pr_curves.png"
 if fig_ablation.exists():
-    st.image(str(fig_ablation), caption="Ablation Comparison Across Baselines and ML Models on 2025 Test Set", use_container_width=True)
+    st.image(str(fig_ablation), caption="Stage A ROC and Precision-Recall Curves (Model 1 vs Model 2 on 2025 Test Set)", use_container_width=True)

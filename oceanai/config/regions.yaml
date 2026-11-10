@@ -26,11 +26,17 @@ regions:
 obis:
   path: "data/processed/obis/obis_occurrences_clean.csv"
   edna_expedition:
-    name: "UNESCO Sundarbans eDNA Expedition"
+    name: "UNESCO eDNA expedition in The Sundarbans (Bangladesh): February 2023"
+    sanctuary: "Sundarbans West Wildlife Sanctuary (Bangladesh)"
+    doi: "10.25607/rt4e3h"
     dates: ["2023-01-08", "2023-01-09"]
     species: "Setipinna tenuifilis"
     records_count: 476
     share_of_total_obis: 0.3934
+    lat_min: 21.703521
+    lat_max: 21.828443
+    lon_min: 89.195000
+    lon_max: 89.284180
 
 grid:
   resolution_deg: 0.25

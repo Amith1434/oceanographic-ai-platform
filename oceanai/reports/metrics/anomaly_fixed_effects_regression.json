@@ -1,0 +1,62 @@
+{
+  "warm_anomaly_on_log_hours": {
+    "Outcome": "log_hours",
+    "Regressor": "warm_anomaly",
+    "Coefficient": 0.06301,
+    "Std_Error": 0.00432,
+    "t_statistic": 14.579,
+    "p_value": 3.8077753017228737e-48,
+    "CI_95_Lower": 0.05454,
+    "CI_95_Upper": 0.07148,
+    "N_Obs": 1255968,
+    "N_Clusters": 14952
+  },
+  "warm_anomaly_on_is_fishing": {
+    "Outcome": "is_fishing",
+    "Regressor": "warm_anomaly",
+    "Coefficient": 0.02118,
+    "Std_Error": 0.00125,
+    "t_statistic": 17.005,
+    "p_value": 7.481735612161436e-65,
+    "CI_95_Lower": 0.01873,
+    "CI_95_Upper": 0.02362,
+    "N_Obs": 1255968,
+    "N_Clusters": 14952
+  },
+  "warm_detrended_on_log_hours": {
+    "Outcome": "log_hours",
+    "Regressor": "warm_anomaly_detrended",
+    "Coefficient": 0.05279,
+    "Std_Error": 0.0044,
+    "t_statistic": 11.992,
+    "p_value": 3.9085794282003125e-33,
+    "CI_95_Lower": 0.04416,
+    "CI_95_Upper": 0.06142,
+    "N_Obs": 1255968,
+    "N_Clusters": 14952
+  },
+  "iso_anomaly_on_log_hours": {
+    "Outcome": "log_hours",
+    "Regressor": "iso_anomaly",
+    "Coefficient": -0.11848,
+    "Std_Error": 0.00479,
+    "t_statistic": -24.74,
+    "p_value": 3.94424170916168e-135,
+    "CI_95_Lower": -0.12787,
+    "CI_95_Upper": -0.1091,
+    "N_Obs": 1255968,
+    "N_Clusters": 14952
+  },
+  "iso_anomaly_on_is_fishing": {
+    "Outcome": "is_fishing",
+    "Regressor": "iso_anomaly",
+    "Coefficient": -0.03222,
+    "Std_Error": 0.00146,
+    "t_statistic": -22.01,
+    "p_value": 2.3139404219505917e-107,
+    "CI_95_Lower": -0.03509,
+    "CI_95_Upper": -0.02935,
+    "N_Obs": 1255968,
+    "N_Clusters": 14952
+  }
+}

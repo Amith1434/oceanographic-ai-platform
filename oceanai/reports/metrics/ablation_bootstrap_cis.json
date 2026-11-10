@@ -1,0 +1,12 @@
+{
+  "Delta_ROC_AUC_M2_minus_M1": {
+    "Mean": -0.0068,
+    "CI_95_Lower": -0.01471,
+    "CI_95_Upper": 0.00137
+  },
+  "Delta_R2_StageB_M2_minus_M1": {
+    "Mean": -0.02959,
+    "CI_95_Lower": -0.04263,
+    "CI_95_Upper": -0.01728
+  }
+}
